@@ -22,6 +22,7 @@ let settings = {
     lineWidth: lineWidth
 };
 
+let drawnLines = [];
 
 const socket = io(); // Connect to server
 
@@ -71,10 +72,23 @@ colorPicker.addEventListener('input', (e) => {
     //}
 });
 
+//function to render individual lines on canvas
+function drawLine(lineData) {
+    ctx.beginPath();
+    ctx.moveTo(lineData.x1, lineData.y1);
+    ctx.lineTo(lineData.x2, lineData.y2);
+    ctx.strokeStyle = lineData.color;
+    ctx.lineWidth = lineData.lineWidth;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+}
+
 //reload with chosen settings
 
 window.addEventListener('load', () => {
     const saved = localStorage.getItem('whiteboardSettings');
+    const savedLines = localStorage.getItem('drawnLines');
+
     if (saved) {
         settings = JSON.parse(saved);
     // Now you can use settings.tool, settings.color, etc.
@@ -99,6 +113,15 @@ window.addEventListener('load', () => {
             eraserBtn.classList.remove('active-tool');
         }
     }
+    if (savedLines) {
+        if (savedLines) {
+            drawnLines = JSON.parse(savedLines);
+            drawnLines.forEach(lineData => {
+                drawLine(lineData);
+            });
+        }
+    }
+
     
     
 });
@@ -143,6 +166,9 @@ canvas.addEventListener('pointermove', (e) => {
     drawLine(drawData);
     lastX = e.clientX;
     lastY = e.clientY;
+
+    drawnLines.push(drawData);
+    localStorage.setItem('drawnLines', JSON.stringify(drawnLines));
 });
 
 
